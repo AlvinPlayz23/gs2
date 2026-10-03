@@ -80,16 +80,24 @@ func check_controller() -> void:
 	var start: Vector3 = player.global_position
 	Input.action_press("move_forward")
 	await wait_frames(30)
-	Input.action_release("move_forward")
 	var forward_delta: Vector3 = player.global_position - start
 	print("   forward delta %s" % forward_delta)
 	_expect(forward_delta.z < -1.0, "W walks the player towards -Z")
 	_expect(absf(forward_delta.y) < 0.1, "the player stays on the floor while walking")
 
-	# --- friction ---------------------------------------------------------
+	# --- releasing W must brake, not slide --------------------------------
+	var speed_at_release := Vector2(player.velocity.x, player.velocity.z).length()
+	var release_position: Vector3 = player.global_position
+	Input.action_release("move_forward")
 	await wait_frames(30)
+	var slide_distance := Vector2(
+		player.global_position.x - release_position.x,
+		player.global_position.z - release_position.z).length()
 	var speed_after_stop := Vector2(player.velocity.x, player.velocity.z).length()
-	_expect(speed_after_stop < 0.05, "the player stops with no key held (%.3f m/s)" % speed_after_stop)
+	print("   released at %.2f m/s, slid %.3f m before stopping" % [speed_at_release, slide_distance])
+	_expect(speed_at_release > 4.5, "the key was released at walking speed")
+	_expect(slide_distance < 0.35, "releasing W brakes instead of sliding (%.3f m)" % slide_distance)
+	_expect(speed_after_stop < 0.05, "the player is stopped half a second later (%.3f m/s)" % speed_after_stop)
 
 	# --- D: strafing ------------------------------------------------------
 	start = player.global_position
@@ -168,6 +176,63 @@ func check_controller() -> void:
 
 	# --- the player must not fall through the floor -----------------------
 	_expect(player.is_on_floor() and player.global_position.y > -1.0, "the player is still above the floor")
+
+	# --- walking camera shake (must only move the camera) ------------------
+	var camera: Camera3D = player.get_node("Head/Camera3D")
+	await wait_frames(60)
+	_expect(camera.position.length() < 0.001, "the camera is perfectly still while standing")
+	var body_before_shake: Vector3 = player.global_position
+	var peak_up := 0.0
+	var peak_down := 0.0
+	var peak_sway := 0.0
+	var peak_roll := 0.0
+	Input.action_press("move_forward")
+	for i in 90:
+		await physics_frame
+		peak_up = maxf(peak_up, camera.position.y)
+		peak_down = minf(peak_down, camera.position.y)
+		peak_sway = maxf(peak_sway, absf(camera.position.x))
+		peak_roll = maxf(peak_roll, absf(camera.rotation.z))
+	Input.action_release("move_forward")
+	var travel: float = (player.global_position - body_before_shake).z
+	print("   shake: up %.4f m, down %.4f m, sway %.4f m, roll %.3f deg" % [
+		peak_up, peak_down, peak_sway, rad_to_deg(peak_roll)])
+	print("   body travelled %.2f m during the shake" % travel)
+	_expect(peak_up > 0.005, "the camera bobs up while walking")
+	_expect(peak_down < -0.005, "the camera dips down while walking (once per footstep)")
+	_expect(peak_sway > 0.005, "the camera sways side to side while walking")
+	_expect(peak_roll > 0.001, "the camera tilts slightly while walking")
+	_expect(travel < -4.0, "the player walks normally and is not slowed by the shake")
+
+	# --- the shake stops cleanly and never drifts --------------------------
+	await wait_frames(60)
+	print("   after stopping: offset %.5f m, roll %.4f deg" % [
+		camera.position.length(), rad_to_deg(absf(camera.rotation.z))])
+	_expect(camera.position.length() < 0.0005, "the camera returns exactly to neutral when stopped")
+	_expect(absf(camera.rotation.x) < 0.0001 and absf(camera.rotation.z) < 0.0001, "the camera rotation returns to neutral")
+
+	# --- sprinting, then a quick mouse flick, must not slide ---------------
+	# The exact reported scenario: sprint, let go of the keys and whip the view
+	# around. Move to open floor first so nothing else interferes.
+	player.global_position = Vector3(0, 0.1, 20)
+	player.velocity = Vector3.ZERO
+	await wait_frames(10)
+	Input.action_press("move_forward")
+	Input.action_press("sprint")
+	await wait_frames(60)
+	var sprint_release_speed := Vector2(player.velocity.x, player.velocity.z).length()
+	var flick_position: Vector3 = player.global_position
+	Input.action_release("move_forward")
+	Input.action_release("sprint")
+	player.rotate_y(PI * 0.5)
+	await wait_frames(30)
+	var flick_slide := Vector2(
+		player.global_position.x - flick_position.x,
+		player.global_position.z - flick_position.z).length()
+	print("   sprint release at %.2f m/s, slid %.3f m after a 90 degree flick" % [sprint_release_speed, flick_slide])
+	_expect(sprint_release_speed > 7.0, "the player was sprinting when the keys were released")
+	_expect(flick_slide < 0.7, "sprinting then turning with the mouse does not slide (%.3f m)" % flick_slide)
+	_expect(Vector2(player.velocity.x, player.velocity.z).length() < 0.05, "the player is fully stopped after the flick")
 	world.free()
 
 
