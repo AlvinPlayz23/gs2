@@ -1,0 +1,24 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapon/weapon_pickup.gd" id="1_pickup"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_pickup"]
+albedo_color = Color(0.847059, 0.635294, 0.227451, 1)
+metallic = 0.4
+roughness = 0.4
+
+[sub_resource type="BoxMesh" id="Box_pickup"]
+material = SubResource("Mat_pickup")
+size = Vector3(0.34, 0.1, 0.1)
+
+[sub_resource type="BoxShape3D" id="Shape_pickup"]
+size = Vector3(0.6, 0.6, 0.6)
+
+[node name="WeaponPickup" type="Area3D"]
+script = ExtResource("1_pickup")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("Box_pickup")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("Shape_pickup")

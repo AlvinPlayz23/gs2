@@ -1,0 +1,40 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapon/damageable.gd" id="1_damageable"]
+[ext_resource type="Script" path="res://scripts/weapon/hitbox.gd" id="2_hitbox"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_dummy"]
+albedo_color = Color(0.749020, 0.717647, 0.647059, 1)
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="Box_body"]
+material = SubResource("Mat_dummy")
+size = Vector3(0.6, 1.4, 0.3)
+
+[sub_resource type="BoxShape3D" id="Shape_body"]
+size = Vector3(0.6, 1.4, 0.3)
+
+[sub_resource type="SphereShape3D" id="Shape_head"]
+radius = 0.22
+
+[node name="TargetDummy" type="StaticBody3D"]
+script = ExtResource("1_damageable")
+max_health = 100.0
+armor = 0.0
+
+[node name="Body" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+mesh = SubResource("Box_body")
+
+[node name="BodyShape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+shape = SubResource("Shape_body")
+
+[node name="Head" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.72, 0)
+script = ExtResource("2_hitbox")
+damage_multiplier = 2.0
+hitbox_name = "head"
+
+[node name="HeadShape" type="CollisionShape3D" parent="Head"]
+shape = SubResource("Shape_head")

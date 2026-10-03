@@ -50,7 +50,7 @@ func check_main_scene() -> void:
 		return
 	var world = packed.instantiate()
 	_expect(world.get_node_or_null("Player") != null, "main scene instances the player")
-	_expect(world.get_node_or_null("Player/Head/Camera3D") != null, "player has a Camera3D under Head")
+	_expect(world.get_node_or_null("Player/Head/RecoilPivot/Camera3D") != null, "player has a Camera3D under Head")
 	_expect(world.get_node_or_null("Ground/Shape") != null, "main scene has ground collision")
 	_expect(world.get_node_or_null("Sun") != null, "main scene has a DirectionalLight3D")
 	world.free()
@@ -178,7 +178,7 @@ func check_controller() -> void:
 	_expect(player.is_on_floor() and player.global_position.y > -1.0, "the player is still above the floor")
 
 	# --- walking camera shake (must only move the camera) ------------------
-	var camera: Camera3D = player.get_node("Head/Camera3D")
+	var camera: Camera3D = player.get_node("Head/RecoilPivot/Camera3D")
 	await wait_frames(60)
 	_expect(camera.position.length() < 0.001, "the camera is perfectly still while standing")
 	var body_before_shake: Vector3 = player.global_position

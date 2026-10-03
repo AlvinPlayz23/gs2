@@ -72,7 +72,8 @@ const CROUCH_HEIGHT: float = 1.1
 const EYE_OFFSET_FROM_TOP: float = 0.2
 
 @onready var head: Node3D = $Head
-@onready var camera: Camera3D = $Head/Camera3D
+@onready var recoil_pivot: Node3D = $Head/RecoilPivot
+@onready var camera: Camera3D = $Head/RecoilPivot/Camera3D
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 ## How far the current pose is between standing (0.0) and crouched (1.0).
