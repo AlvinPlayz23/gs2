@@ -1,0 +1,120 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1_player"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_bottom_color = Color(0.168627, 0.145098, 0.117647, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_world"]
+sky_material = SubResource("ProceduralSkyMaterial_sky")
+
+[sub_resource type="Environment" id="Environment_world"]
+background_mode = 2
+sky = SubResource("Sky_world")
+ambient_light_source = 3
+reflected_light_source = 2
+tonemap_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
+albedo_color = Color(0.243137, 0.254902, 0.219608, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+material = SubResource("StandardMaterial3D_ground")
+size = Vector3(64, 2, 64)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(64, 2, 64)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_props"]
+albedo_color = Color(0.501961, 0.470588, 0.415686, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_crate"]
+material = SubResource("StandardMaterial3D_props")
+size = Vector3(1, 1, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_crate"]
+size = Vector3(1, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall"]
+material = SubResource("StandardMaterial3D_props")
+size = Vector3(8, 3, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall"]
+size = Vector3(8, 3, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ramp"]
+material = SubResource("StandardMaterial3D_props")
+size = Vector3(4, 0.5, 8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ramp"]
+size = Vector3(4, 0.5, 8)
+
+[node name="Main" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_world")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.819152, 0, 0.573576, 0.439385, 0.642788, -0.627506, -0.368687, 0.766044, 0.526541, 0, 12, 0)
+shadow_enabled = true
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("BoxMesh_ground")
+
+[node name="Shape" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_ground")
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="Wall" type="StaticBody3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -12)
+
+[node name="Mesh" type="MeshInstance3D" parent="Props/Wall"]
+mesh = SubResource("BoxMesh_wall")
+
+[node name="Shape" type="CollisionShape3D" parent="Props/Wall"]
+shape = SubResource("BoxShape3D_wall")
+
+[node name="CrateA" type="StaticBody3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.5, -4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Props/CrateA"]
+mesh = SubResource("BoxMesh_crate")
+
+[node name="Shape" type="CollisionShape3D" parent="Props/CrateA"]
+shape = SubResource("BoxShape3D_crate")
+
+[node name="CrateB" type="StaticBody3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.5, -4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Props/CrateB"]
+mesh = SubResource("BoxMesh_crate")
+
+[node name="Shape" type="CollisionShape3D" parent="Props/CrateB"]
+shape = SubResource("BoxShape3D_crate")
+
+[node name="CrateC" type="StaticBody3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.5, -2)
+
+[node name="Mesh" type="MeshInstance3D" parent="Props/CrateC"]
+mesh = SubResource("BoxMesh_crate")
+
+[node name="Shape" type="CollisionShape3D" parent="Props/CrateC"]
+shape = SubResource("BoxShape3D_crate")
+
+[node name="Ramp" type="StaticBody3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 0.939693, 0.342020, 0, -0.342020, 0.939693, 6, 1, -6)
+
+[node name="Mesh" type="MeshInstance3D" parent="Props/Ramp"]
+mesh = SubResource("BoxMesh_ramp")
+
+[node name="Shape" type="CollisionShape3D" parent="Props/Ramp"]
+shape = SubResource("BoxShape3D_ramp")
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 8)
