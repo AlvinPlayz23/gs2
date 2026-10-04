@@ -1,11 +1,11 @@
 [gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/weapon/weapon_data.gd" id="1_data"]
-[ext_resource type="PackedScene" path="res://scenes/weapons/placeholder_weapon.tscn" id="2_viewmodel"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/pistol_9mm.tscn" id="2_viewmodel"]
 
 [resource]
 script = ExtResource("1_data")
-display_name = "PLACEHOLDER PISTOL"
+display_name = "9MM PISTOL"
 slot = 1
 price = 500
 damage = 26.0
@@ -30,7 +30,7 @@ spread_jump_multiplier = 9.0
 spread_crouch_multiplier = 0.6
 draw_time = 0.3
 holster_time = 0.2
-reload_time = 1.3
-reload_empty_extra = 0.35
+reload_time = 2.4
+reload_empty_extra = 0.7
 viewmodel_scene = ExtResource("2_viewmodel")
-viewmodel_transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0.02, 0.02, 0.05)
+viewmodel_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)

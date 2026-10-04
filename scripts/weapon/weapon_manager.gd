@@ -1,7 +1,7 @@
 class_name WeaponManager
 extends Node
 ## The weapon system: firing, hitscan, recoil, spread, reloading, slots,
-## switching and pickups.
+## switching, pickups and bullet-hole impact decals.
 ##
 ## Lives as a child of the player so its [method Node._physics_process] runs
 ## after the player has moved, which keeps [method CharacterBody3D.is_on_floor]
@@ -18,6 +18,10 @@ signal reload_started(state: WeaponState)
 signal reload_finished(state: WeaponState)
 signal ammo_changed(state: WeaponState)
 signal state_changed(new_state: int)
+## Emitted for every hitscan pellet that strikes something. [param info] is the
+## hit dictionary; [code]info["decal"][/code] is true when a bullet hole was
+## left on world geometry (false for flesh hits and misses).
+signal impacted(info: Dictionary)
 
 enum State {
 	## Ready to fire.
@@ -63,6 +67,21 @@ const PICKUP_SCENE: PackedScene = preload("res://scenes/weapons/weapon_pickup.ts
 ## behaviour; change it per match if you want varied luck.
 @export var rng_seed: int = 20250425
 
+@export_group("Impacts")
+## When true, pellets that strike world geometry leave a bullet-hole decal.
+## Pellets that strike flesh never leave one.
+@export var impact_enabled: bool = true
+## Bullet-hole image, projected onto the surface. Leave empty to use the
+## built-in procedural blotch. Place a PNG at
+## [code]assets/textures/decals/bullet_hole.png[/code] and assign it here.
+@export var impact_texture: Texture2D
+## Width and height of one hole in metres.
+@export_range(0.05, 0.5, 0.01, "suffix:m") var impact_size: float = 0.12
+## Seconds a hole stays visible before fading out. 0 or less lasts forever.
+@export_range(0.0, 120.0, 1.0, "suffix:s") var impact_lifetime: float = 25.0
+## How many holes can exist at once; the oldest is recycled past this.
+@export_range(8, 256, 1) var max_impact_decals: int = 64
+
 ## One entry per slot, holding a [WeaponState] or null.
 var slots: Dictionary = {}
 ## Slot currently held, or -1 when unarmed.
@@ -84,6 +103,8 @@ var recoil_pivot: Node3D
 var camera: Camera3D
 var interact_area: Area3D
 var viewmodel: Viewmodel
+## Pooled bullet-hole decals, created at runtime.
+var impact_decals: ImpactDecals
 
 var _pending_slot: int = -1
 var _fire_timer: float = 0.0
@@ -102,6 +123,7 @@ func _ready() -> void:
 	_audio = AudioStreamPlayer.new()
 	_audio.name = "WeaponAudio"
 	add_child(_audio)
+	_create_impacts()
 	# This runs while the player is still adding its own children, so adding the
 	# viewmodel now would fail with "parent node is busy setting up children".
 	# Deferring by one idle frame lets the player finish first.
@@ -341,7 +363,7 @@ func _do_shot(weapon_state: WeaponState) -> void:
 		last_hit = _fire_ray(origin, aim)
 	_play(data.fire_sound)
 	if viewmodel != null:
-		viewmodel.kick(1.0)
+		viewmodel.play_fire_animation()
 	fired.emit(weapon_state)
 	ammo_changed.emit(weapon_state)
 
@@ -392,8 +414,18 @@ func _fire_ray(origin: Vector3, aim: Vector3) -> Dictionary:
 		"armor_penetration": data.armor_penetration,
 	}
 	var collider = hit.get("collider")
+	var struck_flesh := false
 	if collider != null and collider.has_method("apply_damage"):
 		collider.apply_damage(data.damage_at_distance(distance), info)
+		struck_flesh = true
+	# Holes go on walls, crates and the floor — never on the thing you shot.
+	var left_decal := false
+	if impact_enabled and not struck_flesh and impact_decals != null:
+		var surface_normal: Vector3 = hit.get("normal", -direction)
+		impact_decals.spawn_impact(hit["position"], surface_normal)
+		left_decal = true
+	info["decal"] = left_decal
+	impacted.emit(info)
 	return hit
 
 
@@ -534,6 +566,8 @@ func start_reload() -> bool:
 		duration += weapon_state.data.reload_empty_extra
 	_set_state(State.RELOADING)
 	_state_timer = duration
+	if viewmodel != null:
+		viewmodel.play_reload_animation(weapon_state.is_magazine_empty(), duration)
 	reload_started.emit(weapon_state)
 	_play(weapon_state.data.reload_sound)
 	return true
@@ -630,6 +664,15 @@ func _world_parent() -> Node:
 
 
 # --- viewmodel and audio ---------------------------------------------------
+
+## Builds the pooled bullet-hole decals from the impact settings.
+func _create_impacts() -> void:
+	var fx := ImpactDecals.new()
+	fx.name = "ImpactDecals"
+	add_child(fx)
+	fx.configure(impact_texture, impact_size, impact_lifetime, max_impact_decals)
+	impact_decals = fx
+
 
 func _create_viewmodel() -> void:
 	var rig := VIEWMODEL_SCENE.instantiate() as Viewmodel

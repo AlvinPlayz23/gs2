@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene format=3 uid="uid://c6kwq0tscbfip"]
 
-[ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
-[ext_resource type="Script" path="res://scripts/weapon/weapon_hud.gd" id="2_hud"]
-[ext_resource type="Script" path="res://scripts/weapon/weapon_manager.gd" id="3_weapons"]
-[ext_resource type="Resource" path="res://resources/weapons/rifle_placeholder.tres" id="4_rifle"]
+[ext_resource type="Script" uid="uid://djppbl1y7dxv0" path="res://scripts/player.gd" id="1_player"]
+[ext_resource type="Script" uid="uid://bgqkt1sx46fkt" path="res://scripts/weapon/weapon_hud.gd" id="2_hud"]
+[ext_resource type="Script" uid="uid://eqqj1ej5cvcn" path="res://scripts/weapon/weapon_manager.gd" id="3_weapons"]
+[ext_resource type="Resource" path="res://resources/weapons/m4_rifle.tres" id="4_primary"]
 [ext_resource type="Resource" path="res://resources/weapons/pistol_placeholder.tres" id="5_pistol"]
+[ext_resource type="Texture2D" uid="uid://ixekt6l4fakd" path="res://assets/textures/decals/bullet_hole.png" id="6_tuyoq"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
@@ -13,34 +14,33 @@ height = 1.8
 [sub_resource type="SphereShape3D" id="SphereShape3D_interact"]
 radius = 2.0
 
-[node name="Player" type="CharacterBody3D"]
+[node name="Player" type="CharacterBody3D" unique_id=1596459611]
 script = ExtResource("1_player")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2050727762]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_body")
 
-[node name="Head" type="Node3D" parent="."]
+[node name="Head" type="Node3D" parent="." unique_id=859369309]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 
-[node name="RecoilPivot" type="Node3D" parent="Head"]
+[node name="RecoilPivot" type="Node3D" parent="Head" unique_id=372714277]
 
-[node name="Camera3D" type="Camera3D" parent="Head/RecoilPivot"]
+[node name="Camera3D" type="Camera3D" parent="Head/RecoilPivot" unique_id=1817515031]
 fov = 80.0
-near = 0.05
 
-[node name="InteractArea" type="Area3D" parent="."]
+[node name="InteractArea" type="Area3D" parent="." unique_id=753764663]
 collision_layer = 0
-collision_mask = 1
 
-[node name="InteractShape" type="CollisionShape3D" parent="InteractArea"]
+[node name="InteractShape" type="CollisionShape3D" parent="InteractArea" unique_id=968451277]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("SphereShape3D_interact")
 
-[node name="HUD" type="CanvasLayer" parent="."]
+[node name="HUD" type="CanvasLayer" parent="." unique_id=55295725]
 script = ExtResource("2_hud")
 
-[node name="Crosshair" type="Control" parent="HUD"]
+[node name="Crosshair" type="Control" parent="HUD" unique_id=1329338505]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -48,7 +48,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Marker" type="Label" parent="HUD/Crosshair"]
+[node name="Marker" type="Label" parent="HUD/Crosshair" unique_id=632445186]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -60,9 +60,9 @@ theme_override_font_sizes/font_size = 20
 text = "+"
 horizontal_alignment = 1
 vertical_alignment = 1
-mouse_filter = 2
 
-[node name="Weapon" type="Label" parent="HUD"]
+[node name="Weapon" type="Label" parent="HUD" unique_id=199988350]
+anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -76,9 +76,9 @@ theme_override_font_sizes/font_size = 20
 text = "UNARMED"
 horizontal_alignment = 2
 vertical_alignment = 2
-mouse_filter = 2
 
-[node name="Ammo" type="Label" parent="HUD"]
+[node name="Ammo" type="Label" parent="HUD" unique_id=899572469]
+anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -89,12 +89,11 @@ offset_right = -28.0
 offset_bottom = -28.0
 theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
 theme_override_font_sizes/font_size = 34
-text = ""
 horizontal_alignment = 2
 vertical_alignment = 2
-mouse_filter = 2
 
-[node name="State" type="Label" parent="HUD"]
+[node name="State" type="Label" parent="HUD" unique_id=1973101508]
+anchors_preset = 14
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
@@ -103,12 +102,11 @@ offset_bottom = -66.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.4, 1)
 theme_override_font_sizes/font_size = 18
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
-mouse_filter = 2
 
-[node name="Prompt" type="Label" parent="HUD"]
+[node name="Prompt" type="Label" parent="HUD" unique_id=48637369]
+anchors_preset = 14
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
@@ -117,12 +115,11 @@ offset_bottom = 84.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(0.95, 0.92, 0.7, 1)
 theme_override_font_sizes/font_size = 20
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
-mouse_filter = 2
 
-[node name="WeaponManager" type="Node" parent="."]
+[node name="WeaponManager" type="Node" parent="." unique_id=888300955]
 script = ExtResource("3_weapons")
-starting_primary = ExtResource("4_rifle")
+starting_primary = ExtResource("4_primary")
 starting_secondary = ExtResource("5_pistol")
+impact_texture = ExtResource("6_tuyoq")

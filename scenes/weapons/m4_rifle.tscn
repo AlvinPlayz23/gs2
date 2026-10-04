@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapon/animated_weapon_model.gd" id="1_anim"]
+[ext_resource type="PackedScene" path="res://assets/models/viewmodel_m4_rifle/scene.gltf" id="2_gltf"]
+
+[node name="M4Rifle" type="Node3D"]
+script = ExtResource("1_anim")
+head_anchor_name = &"FPS_Camera_j_01"
+idle_anim = &""
+walk_anim = &""
+run_anim = &""
+draw_anim = &"Draw"
+eye_offset = Vector3(0.015, -0.012, 0)
+
+[node name="Model" parent="." instance=ExtResource("2_gltf")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -0.12, -1.38, 0.1)
+
+[node name="Muzzle" type="Marker3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.06, 1.42, 0.63)
